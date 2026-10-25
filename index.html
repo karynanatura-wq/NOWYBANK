@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lumen Bank — Personal loan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ECEAF4; --surface:#FFFFFF; --surface-2:#F5F4FA; --ink:#1A1830; --ink-2:#6B6886;
+  --line:#E2E0EC; --brand:#4B3FB5; --brand-soft:#E6E3F7; --money:#16935F; --money-soft:#DDF3E8;
+  --card-a:#26224A; --card-b:#3A3470; --danger:#E5484D;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F0E18; --surface:#1A1928; --surface-2:#222134; --ink:#F1F0F8; --ink-2:#9A97B5;
+    --line:#2C2A42; --brand:#8F84F0; --brand-soft:#2A2650; --money:#3CC98B; --money-soft:#163528;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F0E18; --surface:#1A1928; --surface-2:#222134; --ink:#F1F0F8; --ink-2:#9A97B5;
+  --line:#2C2A42; --brand:#8F84F0; --brand-soft:#2A2650; --money:#3CC98B; --money-soft:#163528;
+  color-scheme:dark;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%;background:var(--bg);color:var(--ink);font-family:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-feature-settings:"tnum" 1;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--brand);outline-offset:3px;border-radius:8px}
+
+.app{position:relative;max-width:440px;height:100%;margin:0 auto;display:flex;flex-direction:column;overflow:hidden}
+.screen{display:none;flex:1;flex-direction:column;min-height:0}
+.screen.active{display:flex}
+.scroll{flex:1;overflow-y:auto;padding:0 20px 24px}
+
+/* top bar */
+.topbar{display:flex;align-items:center;gap:12px;padding:14px 20px 10px}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:15px;flex-shrink:0}
+.hello{flex:1;min-width:0}
+.hello small{display:block;font-size:12.5px;color:var(--ink-2)}
+.hello b{font-size:16px;font-weight:700}
+.icon-btn{width:40px;height:40px;border-radius:50%;background:var(--surface);display:grid;place-items:center;position:relative;flex-shrink:0}
+.icon-btn svg{width:20px;height:20px}
+.badge{position:absolute;top:8px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--danger);border:2px solid var(--surface)}
+
+/* minimalist card */
+.bank-card{position:relative;width:100%;aspect-ratio:1.586;border-radius:20px;padding:20px 22px;color:#fff;
+  background:linear-gradient(155deg,var(--card-b) 0%,var(--card-a) 70%);overflow:hidden;
+  box-shadow:0 18px 40px -18px rgba(38,34,74,.55)}
+.bank-card::after{content:"";position:absolute;width:260px;height:260px;right:-90px;top:-120px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.12),transparent 65%)}
+.bc-top{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+.bc-logo{font-weight:800;font-size:17px;letter-spacing:-.2px}
+.bc-logo span{opacity:.55;font-weight:500}
+.bc-nfc{width:22px;height:22px;opacity:.75}
+.chip{width:36px;height:27px;border-radius:6px;margin-top:22px;position:relative;z-index:1;
+  background:linear-gradient(135deg,#E4D3A1,#B99A55);overflow:hidden}
+.chip::before,.chip::after{content:"";position:absolute;background:rgba(0,0,0,.18)}
+.chip::before{left:0;right:0;top:50%;height:1px}
+.chip::after{top:0;bottom:0;left:50%;width:1px}
+.bc-bottom{position:absolute;left:22px;right:22px;bottom:18px;display:flex;justify-content:space-between;align-items:flex-end;z-index:1}
+.bc-name{font-size:13px;opacity:.8;font-weight:500}
+.bc-num{font-size:16px;font-weight:600;letter-spacing:1.5px;margin-top:3px}
+.bc-type{font-size:12px;font-weight:700;opacity:.7;letter-spacing:.5px}
+.bc-balance{position:absolute;left:22px;top:58px;z-index:1}
+.bc-balance small{font-size:12px;opacity:.65}
+.bc-balance div{font-size:34px;font-weight:800;letter-spacing:-1px;margin-top:2px}
+
+/* stats */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 20px}
+.stat{background:var(--surface);border-radius:16px;padding:14px}
+.stat small{font-size:12.5px;color:var(--ink-2)}
+.stat b{display:block;font-size:19px;font-weight:700;margin-top:4px}
+.stat .meter{height:5px;border-radius:5px;background:var(--surface-2);margin-top:9px;overflow:hidden}
+.stat .meter i{display:block;height:100%;width:78%;background:var(--money);border-radius:5px}
+
+/* loan panel */
+.panel{background:var(--surface);border-radius:22px;padding:20px}
+.panel h2{font-size:18px;font-weight:700;letter-spacing:-.2px}
+.panel p.sub{font-size:13px;color:var(--ink-2);margin-top:3px}
+.field{margin-top:22px}
+.field-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.field-row label{font-size:14px;color:var(--ink-2)}
+.field-row output{font-size:26px;font-weight:800;letter-spacing:-.6px}
+.range{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;outline:none;cursor:pointer;
+  background:linear-gradient(to right,var(--brand) 0 var(--p,0%),var(--surface-2) var(--p,0%) 100%)}
+.range::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;
+  border:6px solid var(--brand);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.range::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:6px solid var(--brand);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.ticks{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-top:8px}
+.summary{margin-top:22px;border-top:1px solid var(--line);padding-top:14px}
+.sum-row{display:flex;justify-content:space-between;font-size:14px;padding:6px 0}
+.sum-row span{color:var(--ink-2)}
+.sum-row b{font-weight:600}
+.sum-row.main b{font-size:17px;font-weight:800;color:var(--money)}
+
+.cta{display:block;width:100%;margin-top:18px;background:var(--money);color:#fff;border-radius:16px;padding:17px;
+  font-size:16.5px;font-weight:700;transition:transform .12s}
+.cta:active{transform:scale(.98)}
+.fine{font-size:11.5px;color:var(--ink-2);text-align:center;margin-top:10px;line-height:1.45}
+
+/* activity */
+.section-title{display:flex;justify-content:space-between;align-items:center;margin:24px 2px 10px}
+.section-title h3{font-size:16px;font-weight:700}
+.section-title a{font-size:13px;color:var(--brand);text-decoration:none;font-weight:600}
+.tx{display:flex;align-items:center;gap:12px;background:var(--surface);padding:13px 14px;border-radius:16px;margin-bottom:8px}
+.tx-ic{width:38px;height:38px;border-radius:12px;background:var(--surface-2);display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.tx-mid{flex:1;min-width:0}
+.tx-mid b{font-size:14.5px;font-weight:600;display:block}
+.tx-mid small{font-size:12.5px;color:var(--ink-2)}
+.tx-amt{font-weight:700;font-size:14.5px}
+.tx-amt.plus{color:var(--money)}
+.tx.fresh{background:var(--money-soft)}
+
+/* tab bar */
+.tabbar{display:flex;background:var(--surface);border-top:1px solid var(--line);padding:8px 8px 10px;flex-shrink:0}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--ink-2);font-weight:500;padding:4px 0}
+.tab svg{width:22px;height:22px}
+.tab.on{color:var(--brand);font-weight:700}
+
+/* processing */
+.center{flex:1;display:flex;flex-direction:column;justify-content:center;padding:24px 28px}
+.spinner{width:56px;height:56px;border-radius:50%;border:5px solid var(--brand-soft);border-top-color:var(--brand);
+  animation:spin .9s linear infinite;margin:0 auto 24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.center h2{text-align:center;font-size:22px;font-weight:700}
+.center p.lead{text-align:center;color:var(--ink-2);font-size:14px;margin-top:6px}
+.checks{margin-top:30px;background:var(--surface);border-radius:20px;padding:6px 18px}
+.check{display:flex;align-items:center;gap:12px;padding:13px 0;font-size:14.5px;color:var(--ink-2);border-bottom:1px solid var(--line)}
+.check:last-child{border-bottom:none}
+.check i{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-style:normal;font-size:12px;color:#fff;flex-shrink:0;transition:.25s}
+.check.done{color:var(--ink)}
+.check.done i{background:var(--money);border-color:var(--money)}
+
+/* approved */
+.ok-head{display:flex;align-items:center;gap:12px;padding:18px 20px 16px}
+.ok-badge{width:44px;height:44px;border-radius:50%;background:var(--money-soft);color:var(--money);display:grid;place-items:center;font-size:22px;font-weight:800}
+.ok-head h2{font-size:19px;font-weight:700}
+.ok-head small{font-size:13px;color:var(--ink-2)}
+.tap-hint{text-align:center;font-size:13px;color:var(--ink-2);margin-top:16px}
+
+/* profile sheet */
+.scrim{position:absolute;inset:0;background:rgba(10,8,30,.45);opacity:0;pointer-events:none;transition:opacity .25s;z-index:50}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{position:absolute;top:0;bottom:0;left:0;width:84%;max-width:360px;background:var(--bg);z-index:51;
+  transform:translateX(-102%);transition:transform .3s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;padding:24px 18px}
+.sheet.open{transform:none}
+.profile{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.profile .avatar{width:56px;height:56px;font-size:20px}
+.profile b{font-size:18px;font-weight:700;display:block}
+.profile small{font-size:13px;color:var(--ink-2)}
+.verified{display:inline-flex;align-items:center;gap:6px;background:var(--money-soft);color:var(--money);font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:20px;margin-bottom:18px;align-self:flex-start}
+.menu{background:var(--surface);border-radius:18px;overflow:hidden}
+.menu button{display:flex;width:100%;align-items:center;gap:12px;padding:15px 16px;font-size:15px;border-bottom:1px solid var(--line);text-align:left}
+.menu button:last-child{border-bottom:none}
+.menu button span{flex:1}
+.menu button em{font-style:normal;color:var(--ink-2);font-size:13px}
+.logout{margin-top:auto;color:var(--danger);font-weight:600;padding:14px;text-align:center}
+
+/* notifications toast */
+.toast{position:absolute;left:16px;right:16px;top:12px;background:var(--surface);border-radius:16px;padding:13px 15px;
+  box-shadow:0 12px 30px -10px rgba(0,0,0,.3);display:flex;gap:12px;align-items:center;z-index:60;
+  transform:translateY(-140%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.toast.show{transform:none}
+.toast b{font-size:14px;display:block}
+.toast small{font-size:12.5px;color:var(--ink-2)}
+
+/* confetti */
+#confetti{display:none;position:fixed;inset:0;background:rgba(10,8,30,.72);z-index:400;overflow:hidden}
+#confetti .msg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;color:#fff;width:86%;max-width:340px;z-index:2}
+#confetti .msg small{font-size:15px;opacity:.8}
+#confetti .msg div{font-size:46px;font-weight:800;letter-spacing:-1.5px;margin:6px 0 4px}
+#confetti .msg p{font-size:14px;opacity:.7}
+.confetti-piece,.confetti-rect{position:absolute;animation:fall linear forwards;pointer-events:none}
+.confetti-rect{border-radius:2px}
+@keyframes fall{0%{transform:translateY(-60px) rotate(0)}80%{opacity:1}100%{transform:translateY(110vh) rotate(720deg) scale(.5);opacity:0}}
+@media (prefers-reduced-motion:reduce){.spinner{animation-duration:2.5s}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- toast -->
+  <div class="toast" id="toast">
+    <div class="tx-ic">💸</div>
+    <div><b id="toastTitle">Lumen Bank</b><small id="toastText"></small></div>
+  </div>
+
+  <!-- ===== SCREEN 1: HOME / CALCULATOR ===== -->
+  <section class="screen active" id="s-home">
+    <header class="topbar">
+      <button class="avatar" onclick="openSheet()" aria-label="Open profile">CJ</button>
+      <div class="hello"><small id="greet">Good morning</small><b>Camilla Johnson</b></div>
+      <button class="icon-btn" aria-label="Notifications" onclick="showToast('Lumen Bank','You’re pre-approved for up to $10,000')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>
+        <span class="badge"></span>
+      </button>
+    </header>
+
+    <div class="scroll">
+      <div class="bank-card">
+        <div class="bc-top">
+          <div class="bc-logo">lumen<span>.bank</span></div>
+          <svg class="bc-nfc" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M8.5 7.5a6 6 0 0 1 0 9"/><path d="M12 5a9.5 9.5 0 0 1 0 14"/><path d="M15.5 2.5a13 13 0 0 1 0 19"/></svg>
+        </div>
+        <div class="chip"></div>
+        <div class="bc-bottom">
+          <div><div class="bc-name">Camilla Johnson</div><div class="bc-num">•••• 4821</div></div>
+          <div class="bc-type">DEBIT</div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><small>Card balance</small><b>$1,248.30</b></div>
+        <div class="stat"><small>Credit score</small><b>742 · Good</b><div class="meter"><i></i></div></div>
+      </div>
+
+      <div class="panel">
+        <h2>Personal loan</h2>
+        <p class="sub">You’re pre-approved. Money arrives on your card in minutes.</p>
+
+        <div class="field">
+          <div class="field-row"><label for="amount">Amount</label><output id="amountOut">$2,000</output></div>
+          <input class="range" id="amount" type="range" min="2000" max="10000" step="100" value="2000">
+          <div class="ticks"><span>$2,000</span><span>$10,000</span></div>
+        </div>
+
+        <div class="field">
+          <div class="field-row"><label for="term">Loan term</label><output id="termOut">4 months</output></div>
+          <input class="range" id="term" type="range" min="4" max="12" step="1" value="4">
+          <div class="ticks"><span>4 mo</span><span>12 mo</span></div>
+        </div>
+
+        <div class="summary">
+          <div class="sum-row main"><span>Monthly payment</span><b id="monthly">$0</b></div>
+          <div class="sum-row"><span>Interest rate (APR)</span><b>12.9%</b></div>
+          <div class="sum-row"><span>Total to repay</span><b id="total">$0</b></div>
+          <div class="sum-row"><span>First payment</span><b id="firstPay">—</b></div>
+        </div>
+
+        <button class="cta" id="cta" onclick="onContinue()">Get $2,000</button>
+        <p class="fine">Checking your offer won’t affect your credit score.</p>
+      </div>
+
+      <div class="section-title"><h3>Recent activity</h3><a href="#" onclick="return false">See all</a></div>
+      <div class="tx"><div class="tx-ic">☕</div><div class="tx-mid"><b>Blue Bottle Coffee</b><small>Today, 08:42</small></div><div class="tx-amt">−$6.40</div></div>
+      <div class="tx"><div class="tx-ic">🛒</div><div class="tx-mid"><b>Whole Foods</b><small>Yesterday, 19:15</small></div><div class="tx-amt">−$84.12</div></div>
+      <div class="tx"><div class="tx-ic">💼</div><div class="tx-mid"><b>Salary</b><small>Oct 20</small></div><div class="tx-amt plus">+$2,350.00</div></div>
+    </div>
+
+    <nav class="tabbar">
+      <button class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
+      <button class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M2.5 10h19"/></svg>Cards</button>
+      <button class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.5-.8-1.6-1.3-2.8-1.3-1.6 0-2.8.8-2.8 2s1.2 1.7 2.8 2.1 2.8.9 2.8 2.1-1.2 2-2.8 2c-1.3 0-2.4-.5-2.9-1.4M12 6.5v11"/></svg>Loans</button>
+      <button class="tab" onclick="openSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Profile</button>
+    </nav>
+  </section>
+
+  <!-- ===== SCREEN 2: PROCESSING ===== -->
+  <section class="screen" id="s-proc">
+    <div class="center">
+      <div class="spinner"></div>
+      <h2>Reviewing your application</h2>
+      <p class="lead" id="procLead">$2,000 for 4 months</p>
+      <div class="checks">
+        <div class="check" id="c1"><i>✓</i>Identity verified</div>
+        <div class="check" id="c2"><i>✓</i>Credit history checked</div>
+        <div class="check" id="c3"><i>✓</i>Income confirmed</div>
+        <div class="check" id="c4"><i>✓</i>Sending money to your card</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SCREEN 3: APPROVED ===== -->
+  <section class="screen" id="s-ok" onclick="onApprovedTap()">
+    <div class="ok-head">
+      <div class="ok-badge">✓</div>
+      <div><h2>Loan approved</h2><small id="okSub">Funds sent to •••• 4821</small></div>
+    </div>
+    <div class="scroll">
+      <div class="bank-card">
+        <div class="bc-top">
+          <div class="bc-logo">lumen<span>.bank</span></div>
+          <svg class="bc-nfc" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M8.5 7.5a6 6 0 0 1 0 9"/><path d="M12 5a9.5 9.5 0 0 1 0 14"/><path d="M15.5 2.5a13 13 0 0 1 0 19"/></svg>
+        </div>
+        <div class="bc-balance"><small>Loan received</small><div id="amountDisplay">$0</div></div>
+        <div class="bc-bottom">
+          <div><div class="bc-name">Camilla Johnson</div><div class="bc-num">•••• 4821</div></div>
+          <div class="bc-type">DEBIT</div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><small>New balance</small><b id="newBal">$1,248.30</b></div>
+        <div class="stat"><small>Monthly payment</small><b id="okMonthly">$0</b></div>
+      </div>
+
+      <div class="section-title"><h3>Recent activity</h3></div>
+      <div class="tx fresh"><div class="tx-ic">🏦</div><div class="tx-mid"><b>Loan disbursement</b><small>Just now</small></div><div class="tx-amt plus" id="txLoan">+$0</div></div>
+      <div class="tx"><div class="tx-ic">☕</div><div class="tx-mid"><b>Blue Bottle Coffee</b><small>Today, 08:42</small></div><div class="tx-amt">−$6.40</div></div>
+      <p class="tap-hint">Tap anywhere to continue</p>
+    </div>
+  </section>
+
+  <!-- profile sheet -->
+  <div class="scrim" id="scrim" onclick="closeSheet()"></div>
+  <aside class="sheet" id="sheet" aria-label="Profile">
+    <div class="profile"><div class="avatar">CJ</div><div><b>Camilla Johnson</b><small>camilla.j@mail.com</small></div></div>
+    <div class="verified">✓ Identity verified</div>
+    <div class="menu">
+      <button>👤<span>Personal details</span></button>
+      <button>💳<span>My cards</span><em>2</em></button>
+      <button>📄<span>Loans</span><em>Pre-approved</em></button>
+      <button>🔒<span>Security</span><em>Face ID</em></button>
+      <button>🔔<span>Notifications</span></button>
+      <button>💬<span>Support</span><em>24/7</em></button>
+    </div>
+    <button class="logout" onclick="closeSheet()">Log out</button>
+  </aside>
+</div>
+
+<div id="confetti">
+  <div class="msg"><small>Money is on your card</small><div id="confAmt">$0</div><p>Tap to close</p></div>
+</div>
+
+<script>
+var APR = 0.129, BASE_BAL = 1248.30;
+var amount = document.getElementById('amount');
+var term = document.getElementById('term');
+var fmt = function(v, dec){ return '$' + v.toLocaleString('en-US',{minimumFractionDigits:dec||0,maximumFractionDigits:dec||0}); };
+
+(function(){ var h = new Date().getHours();
+  document.getElementById('greet').textContent = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; })();
+
+function setFill(r){ r.style.setProperty('--p', ((r.value - r.min) / (r.max - r.min) * 100) + '%'); }
+function monthlyPay(p, n){ var r = APR / 12; return p * r / (1 - Math.pow(1 + r, -n)); }
+
+function update(){
+  var a = +amount.value, n = +term.value, m = monthlyPay(a, n);
+  setFill(amount); setFill(term);
+  document.getElementById('amountOut').textContent = fmt(a);
+  document.getElementById('termOut').textContent = n + ' months';
+  document.getElementById('monthly').textContent = fmt(m, 2);
+  document.getElementById('total').textContent = fmt(m * n, 2);
+  document.getElementById('cta').textContent = 'Get ' + fmt(a);
+  var d = new Date(); d.setMonth(d.getMonth() + 1);
+  document.getElementById('firstPay').textContent = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+amount.addEventListener('input', update);
+term.addEventListener('input', update);
+update();
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+function openSheet(){ document.getElementById('sheet').classList.add('open'); document.getElementById('scrim').classList.add('open'); }
+function closeSheet(){ document.getElementById('sheet').classList.remove('open'); document.getElementById('scrim').classList.remove('open'); }
+
+var toastTimer;
+function showToast(title, text){
+  var t = document.getElementById('toast');
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastText').textContent = text;
+  t.classList.add('show'); clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3200);
+}
+
+function countUp(el, to, ms, prefix, dec){
+  var t0 = null;
+  function step(ts){
+    if (!t0) t0 = ts;
+    var p = Math.min((ts - t0) / ms, 1), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = (prefix || '') + fmt(e * to, dec);
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function onContinue(){
+  var a = +amount.value, n = +term.value;
+  document.getElementById('procLead').textContent = fmt(a) + ' for ' + n + ' months';
+  ['c1','c2','c3','c4'].forEach(function(id){ document.getElementById(id).classList.remove('done'); });
+  show('s-proc');
+  ['c1','c2','c3','c4'].forEach(function(id, i){
+    setTimeout(function(){ document.getElementById(id).classList.add('done'); }, 550 * (i + 1));
+  });
+  setTimeout(function(){ showApproved(a, n); }, 550 * 5);
+}
+
+function showApproved(a, n){
+  show('s-ok');
+  document.getElementById('okMonthly').textContent = fmt(monthlyPay(a, n), 2);
+  document.getElementById('txLoan').textContent = '+' + fmt(a, 2);
+  countUp(document.getElementById('amountDisplay'), a, 2000);
+  countUp(document.getElementById('newBal'), BASE_BAL + a, 2000, '', 2);
+  setTimeout(function(){ showToast('Lumen Bank', 'Incoming transfer +' + fmt(a, 2)); }, 600);
+}
+
+function onApprovedTap(){
+  var c = document.getElementById('confetti');
+  document.getElementById('confAmt').textContent = '+' + fmt(+amount.value);
+  c.style.display = 'block';
+  launchConfetti(c);
+}
+
+var emojis = ['🎉','🎊','⭐','✨','🥳','💰','💵'];
+var colors = ['#8F84F0','#3CC98B','#FFD166','#FF7AA2','#5BC0EB','#FFFFFF'];
+function launchConfetti(c){
+  c.querySelectorAll('.confetti-piece,.confetti-rect').forEach(function(n){ n.remove(); });
+  for (var i = 0; i < 80; i++) (function(idx){
+    setTimeout(function(){
+      var el = document.createElement('div');
+      if (idx % 3 === 0){
+        el.className = 'confetti-piece';
+        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        el.style.fontSize = (20 + Math.random() * 18) + 'px';
+        el.style.animationDuration = (1.6 + Math.random() * 2).toFixed(2) + 's';
+      } else {
+        el.className = 'confetti-rect';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.width = (7 + Math.random() * 7) + 'px';
+        el.style.height = (11 + Math.random() * 10) + 'px';
+        el.style.animationDuration = (1.3 + Math.random() * 2).toFixed(2) + 's';
+      }
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.top = '-40px';
+      c.appendChild(el);
+    }, idx * 30);
+  })(i);
+}
+document.getElementById('confetti').addEventListener('click', function(){ this.style.display = 'none'; });
+</script>
+</body>
+</html>
